@@ -84,12 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showAPIAvg(){
+
         const averageResponseTimek3s = calculateAverage(responseTimesK3s);
-        if(!averageResponseTimek3s){
+        if(averageResponseTimek3s){
             console.log(`머신러닝 기반 k3s: ${averageResponseTimek3s.toFixed(2)} ms`);
         }
         const averageResponseTimek8s = calculateAverage(responseTimesK8s);
-        if(!averageResponseTimek8s){
+        if(averageResponseTimek8s){
             console.log(`CPU/MEM 기반 k8s: ${averageResponseTimek8s.toFixed(2)} ms`);
         }
     }
