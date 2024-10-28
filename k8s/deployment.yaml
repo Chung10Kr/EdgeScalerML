@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-spring-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-spring-app
+  template:
+    metadata:
+      labels:
+        app: my-spring-app
+    spec:
+      containers:
+      - name: my-spring-app
+        image: my-spring-app:latest
+        resources:
+          requests:
+            cpu: 100m      # 최소 CPU 요청 (0.1 vCPU)
+            memory: 64Mi   # 최소 메모리 요청
+          limits:
+            cpu: 200m      # 최대 CPU 사용 제한 (0.2 vCPU)
+            memory: 128Mi  # 최대 메모리 사용 제한
+        ports:
+        - containerPort: 8080
