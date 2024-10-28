@@ -7,6 +7,7 @@ This project implements **machine learning-based auto-scaling** for connected ca
 - **Machine Learning-Based Auto-Scaling**: Dynamically adjusts server resources based on predictive models.
 - **Edge Computing for Connected Cars**: Optimized for edge networks to support high-volume data in real-time.
 - **Digital Twin Integration**: Simulates real-world conditions for accurate testing and performance tuning.
+![DT](./img/digitalTwin.png)
 - **K8s & K3s Compatibility**: Supports both full-scale Kubernetes and lightweight K3s for versatile deployment.
 
 ## Project Structure
