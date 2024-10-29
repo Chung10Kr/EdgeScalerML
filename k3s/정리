@@ -1,8 +1,8 @@
 # 파일 전송
-multipass transfer deployment.yaml k3s-vm:/home/ubuntu/deployment.yaml
-multipass transfer demo-0.0.1-SNAPSHOT.jar k3s-vm:/home/ubuntu/demo-0.0.1-SNAPSHOT.jar
-multipass transfer Dockerfile k3s-vm:/home/ubuntu/Dockerfile
-multipass transfer service.yaml k3s-vm:/home/ubuntu/service.yaml
+multipass transfer deployment.yaml k8s-single-node:/home/ubuntu/deployment.yaml
+multipass transfer demo-0.0.1-SNAPSHOT.jar k8s-single-node:/home/ubuntu/demo-0.0.1-SNAPSHOT.jar
+multipass transfer Dockerfile k8s-single-node:/home/ubuntu/Dockerfile
+multipass transfer service.yaml k8s-single-node:/home/ubuntu/service.yaml
 
 
 # 환경 셋팅
@@ -17,7 +17,7 @@ docker run -d -p 5000:5000 --name registry registry:2
 
 # 나갔다가, 재접속
 exit
-multipass shell k3s-vm
+multipass shell k8s-single-node
 
 
 # 빌드 & 레지스터 등록
@@ -38,10 +38,15 @@ k3s kubectl get services
 
 
 # 가상머신 삭제 및 재 생성
-multipass delete k3s-vm
+multipass delete k8s-single-node
 multipass purge
-multipass launch --name k3s-vm --memory 1G --disk 10G
+multipass launch --name k3s-cpu-node --cpus 2 --memory 2G --disk 10G
 
 
 # 로그 보기
 k3s kubectl logs <파드 이름>
+
+논문에서 내가 제안하는 방법의 우수성을 비교할려면,,3가지정도 비교할려고해
+1. 동일한 스펙의 K8s에서 진행하는 CPU/MEM 기반 오토 스케일링
+2. 동일한 스펙의 K3s에서 진행하는 CPU/MEM 기반 오토 스케일링
+3. 동일한 스펙의 K3s에서 진행하는 머신러닝 기반 오토 스케일링
