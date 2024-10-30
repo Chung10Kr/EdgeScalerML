@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-spring-app
+  name: my-spring-deployment
 spec:
-  replicas: 2  # 파드 수 설정
+  replicas: 1  # 시작할 파드 수
   selector:
     matchLabels:
       app: my-spring-app
@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: my-spring-container
-        image: localhost:5000/my-spring-app:latest
+        image: my-spring-image:latest  # 빌드한 이미지 이름
+        imagePullPolicy: IfNotPresent 
         ports:
         - containerPort: 8080
         resources:
