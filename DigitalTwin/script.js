@@ -43,7 +43,7 @@ let carIdCounter = 1; // 전역에서 카운터 초기화
 
 let scene, camera, renderer;
 let cars = []
-
+const people = [];
 const laneWidth = 0.5;
 const roadRadius = 8;
 const laneRadii = [
@@ -60,6 +60,9 @@ const defaultCount = 5; // 기본 자동차 수
 function init() {
     renderBackGround();
 
+    // 사람들이 도로를 따라 원형 경로를 돌도록 설정
+    
+    
     window.addEventListener('resize', () => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -77,7 +80,7 @@ function init() {
 
     function animate() {
         requestAnimationFrame(animate);
-
+        animatePeople(people);   // 사람들을 움직이게 함
         adjustSpeedForSpacing(); // 매 프레임마다 간격 조정
 
         cars.forEach((carData) => {
@@ -306,7 +309,53 @@ function renderBackGround() {
     createSign(5, 1, -roadRadius - 2);
     createSign(5, 1.3, -roadRadius - 2);
 
+
+    const sidewalkRadius = roadRadius + laneWidth * 4 + 0.5; // 사람들이 회전할 반지름 설정
+    for (let i = 0; i < 5; i++) {
+        const personData = createPerson(sidewalkRadius);
+        personData.angle = (i / 5) * Math.PI * 2; // 각 사람의 초기 각도 설정
+        people.push(personData);
+    }
+
 }
+
+function createPerson(radius) {
+    const person = new THREE.Group();
+
+    // 몸통
+    const bodyGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.3);
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xffcc99 });
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.position.y = 0.15;
+    person.add(body);
+
+    // 머리
+    const headGeometry = new THREE.SphereGeometry(0.1);
+    const headMaterial = new THREE.MeshStandardMaterial({ color: 0xffddaa });
+    const head = new THREE.Mesh(headGeometry, headMaterial);
+    head.position.y = 0.4;
+    person.add(head);
+
+    scene.add(person);
+
+    return { person, angle: 0, radius, speed: 0.005 };
+}
+
+
+function animatePeople(people) {
+    people.forEach(personData => {
+        // 각도 업데이트하여 원형 경로로 이동
+        personData.angle += personData.speed;
+        personData.person.position.x = personData.radius * Math.cos(personData.angle);
+        personData.person.position.z = personData.radius * Math.sin(personData.angle);
+        
+        // 사람의 회전 방향을 따라가도록 설정
+        personData.person.rotation.y = -personData.angle;
+    });
+}
+
+
+
 
 function createCrosswalk(centerX, radius) {
     const crosswalkWidth = 1;
@@ -349,6 +398,8 @@ function createSign(x, y, z) {
 
     scene.add(sign);
 }
+
+
 
 function createTrafficLight(x, y, z, scale = 1) {
     const trafficLight = new THREE.Group();
