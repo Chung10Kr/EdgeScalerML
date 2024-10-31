@@ -143,7 +143,7 @@ function createCar(id, color) {
 
     // 일정 주기로 API 통신 (5초마다 위치와 속도 전송)
     const intervalId = setInterval(() => {
-        apiCall('http://localhost:8080/hello', responseTimesK8s)
+        //apiCall('http://localhost:8080/hello', responseTimesK8s)
     }, 10000);
 
     activeIntervals[id] = intervalId; // 자동차 ID로 interval 저장
@@ -295,7 +295,94 @@ function renderBackGround() {
         createTree(xInner, zInner);
     }
 
+    // 신호등
+    createTrafficLight(4, 3, roadRadius + laneWidth * 2.5 , 1);
+    createTrafficLight(14, 13, roadRadius + laneWidth * 3 , 0.67);
+
+    // 횡단보도 생성
+    createCrosswalk(5, roadRadius);
+
+    // 간판 생성
+    createSign(5, 1, -roadRadius - 2);
+    createSign(5, 1.3, -roadRadius - 2);
+
 }
+
+function createCrosswalk(centerX, radius) {
+    const crosswalkWidth = 1;
+    const lineLength = 0.2;
+    const lineSpacing = 0.15;
+
+    for (let i = -5; i < 5; i++) {
+        const lineGeometry = new THREE.PlaneGeometry(lineLength, crosswalkWidth);
+        const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+        const line = new THREE.Mesh(lineGeometry, lineMaterial);
+        
+        // 횡단보도 선 배치
+        line.rotation.x = -Math.PI / 2; // 평면을 지면과 평행하게 배치
+        line.rotation.z = Math.PI / 1.5;  // 90도 회전하여 세로 방향으로 배치
+        line.position.set(centerX, 0.01, radius + i * (lineLength + lineSpacing));
+        
+        scene.add(line);
+    }
+}
+
+function createSign(x, y, z) {
+    const sign = new THREE.Group();
+
+    // 간판 기둥
+    const poleGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1);
+    const poleMaterial = new THREE.MeshBasicMaterial({ color: 0x333333 });
+    const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+    pole.position.set(x, y + 0.5, z);
+    sign.add(pole);
+
+    // 간판 본체
+    const signGeometry = new THREE.BoxGeometry(0.8, 0.4, 0.05);
+    const signMaterial = new THREE.MeshBasicMaterial({ color: 0x0055ff });
+    const signBox = new THREE.Mesh(signGeometry, signMaterial);
+    signBox.position.set(x, y + 1, z);
+    sign.add(signBox);
+
+    // 간판 텍스트 (Texture를 사용하여 텍스트를 추가할 수 있습니다)
+    // 간단한 텍스트는 TextGeometry를 통해 추가 가능
+
+    scene.add(sign);
+}
+
+function createTrafficLight(x, y, z, scale = 1) {
+    const trafficLight = new THREE.Group();
+
+    // 신호등 기둥
+    const poleGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1);
+    const poleMaterial = new THREE.MeshBasicMaterial({ color: 0x333333 });
+    const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+    pole.position.set(x, y + 0.5, z);
+    trafficLight.add(pole);
+
+    // 신호등 본체
+    const lightBoxGeometry = new THREE.BoxGeometry(0.2, 0.5, 0.2);
+    const lightBoxMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const lightBox = new THREE.Mesh(lightBoxGeometry, lightBoxMaterial);
+    lightBox.position.set(x, y + 1, z);
+    trafficLight.add(lightBox);
+
+    // 빨간불, 노란불, 초록불
+    const lightColors = [0xff0000, 0xffff00, 0x00ff00];
+    lightColors.forEach((color, index) => {
+        const lightGeometry = new THREE.CircleGeometry(0.07, 16);
+        const lightMaterial = new THREE.MeshBasicMaterial({ color });
+        const light = new THREE.Mesh(lightGeometry, lightMaterial);
+        light.position.set(x, y + 1.15 - index * 0.2, z + 0.11);
+        trafficLight.add(light);
+    });
+
+    // 스케일 조정
+    trafficLight.scale.set(scale, scale, scale);
+
+    scene.add(trafficLight);
+}
+
 
 function getRandomColor() {
     return Math.floor(Math.random() * 0xffffff);
