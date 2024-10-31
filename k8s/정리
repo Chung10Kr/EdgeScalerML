@@ -10,6 +10,8 @@ kubectl apply -f service.yaml
 kubectl apply -f hpa.yaml
 kubectl apply -f components.yaml
 
+# Deployment
+kubectl set image deployment/my-spring-deployment my-spring-container=my-spring-image:latest
 
 # 배포 상태 확인
 kubectl get deployments
@@ -17,8 +19,9 @@ kubectl get pods
 kubectl get services
 kubectl get hpa
 
+
 # 포트포워딩
-kubectl port-forward svc/my-spring-service 8080:8080
+# kubectl port-forward svc/my-spring-service 8080:8080 - X
 
 
 # 기타 명령어
@@ -33,7 +36,6 @@ kubectl run -it --rm load-generator --image=rakyll/hey -- -z 30s -q 10 -c 5 http
 # 삭제
 kubectl delete deployment my-spring-deployment
 kubectl delete hpa --all
-kubectl delete pod load-generator
 
 # 파드 모니터링
 kubectl get hpa -w

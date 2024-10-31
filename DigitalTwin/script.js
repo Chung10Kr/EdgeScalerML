@@ -1,26 +1,31 @@
 // 시간대별 자동차 수 설정
 const timeSchedules = [
-    { time: "07:30", count: 10 },
-    { time: "09:00", count: 15 },
-    { time: "12:00", count: 5 },
+    { min: "01", count: 10 },
+    { min: "02", count: 15 },
+    { min: "03", count: 5 },
+    { min: "15", count: 5 },
+    { min: "16", count: 10 },
+    { min: "17", count: 15 },
+    { min: "18", count: 30 },
 
-    { time: "13:29", count: 20 },
-    { time: "13:30", count: 40 },
-    { time: "13:31", count: 80 },
-    { time: "13:32", count: 100 },
-
-    { time: "14:28", count: 10 },
-    { time: "14:29", count: 50 },
-
-    { time: "18:00", count: 20 },
-    { time: "22:00", count: 3 }
+    { min: "21", count: 10 },
+    { min: "22", count: 15 },
+    { min: "23", count: 30 },
+    
+    { min: "40", count: 30 },
+    { min: "41", count: 40 },
+    { min: "42", count: 35 },
+    { min: "43", count: 32 },
+    { min: "44", count: 31 },
 ];
 
 
-let responseTimesK3s = []; // 모든 자동차의 응답 시간을 저장하는 배열 - k3s
+let responseTimesK3s_cpu = []; // 모든 자동차의 응답 시간을 저장하는 배열 - k3s CPU 기반
+let responseTimesK3s_ml = []; // 모든 자동차의 응답 시간을 저장하는 배열 - k3s  ML 기반
 let responseTimesK8s = []; // 모든 자동차의 응답 시간을 저장하는 배열 - k8s
 let activeIntervals = {}; // 각 자동차의 setInterval ID를 저장하는 객체
 let carIdCounter = 1; // 전역에서 카운터 초기화
+
 document.addEventListener('DOMContentLoaded', () => {
     // Three.js 초기화 설정
     const scene = new THREE.Scene();
@@ -85,22 +90,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showAPIAvg(){
 
-        const averageResponseTimek3s = calculateAverage(responseTimesK3s);
-        if(averageResponseTimek3s){
-            console.log(`머신러닝 기반 k3s: ${averageResponseTimek3s.toFixed(2)} ms`);
-        }
+        const averageResponseTimek3s_cpu = calculateAverage(responseTimesK3s_cpu);
+        const averageResponseTimek3s_ml = calculateAverage(responseTimesK3s_ml);
         const averageResponseTimek8s = calculateAverage(responseTimesK8s);
-        if(averageResponseTimek8s){
-            console.log(`CPU/MEM 기반 k8s: ${averageResponseTimek8s.toFixed(2)} ms`);
-        }
+
+        const now = new Date();
+        const currentMin = `${String(now.getMinutes()).padStart(2, '0')}`;
+        let msg = `${currentMin}|${ (averageResponseTimek3s_ml/1000).toFixed(3) }          | ${ (averageResponseTimek3s_cpu/1000).toFixed(3) }          | ${ (averageResponseTimek8s/1000).toFixed(3) }`;
+        console.log(msg);
+
     }
 
+    let msg = `현재 분 | 머신러닝 기반 k3s | CPU/MEM 기반 k3s | CPU/MEM 기반 k8s  (초)`;
+    console.log(msg);
     setInterval(() => {
         showAPIAvg()
-    }, 10000);
+    }, 60000);
 
     // 자동차 데이터를 API로 전송하는 함수
-    async function sendK3s(carId, position, speed) {
+    async function sendK3s_CPU(carId, position, speed) {
         const startTime = performance.now();
 
         try {
@@ -108,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await sleep(100);
             /*
             const response = await fetch('http://your-api-endpoint.com/car-status', {
-                method: 'POST',
+                method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ carId, position, speed })
             });
@@ -118,14 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const endTime = performance.now();
 
             const responseTime = endTime - startTime;
-            responseTimesK3s.push(responseTime);
+            responseTimesK3s_cpu.push(responseTime);
         } catch (error) {
             console.error(`자동차 ${carId} 요청 실패:`, error);
         }
     }
 
-    // 자동차 데이터를 API로 전송하는 함수
-    async function sendK8s(carId, position, speed) {
+    async function sendK3s_ML(carId, position, speed) {
         const startTime = performance.now();
 
         try {
@@ -133,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await sleep(100);
             /*
             const response = await fetch('http://your-api-endpoint.com/car-status', {
-                method: 'POST',
+                method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ carId, position, speed })
             });
@@ -142,6 +149,25 @@ document.addEventListener('DOMContentLoaded', () => {
             */
             const endTime = performance.now();
 
+            const responseTime = endTime - startTime;
+            responseTimesK3s_ml.push(responseTime);
+        } catch (error) {
+            console.error(`자동차 ${carId} 요청 실패:`, error);
+        }
+    }
+
+    
+    // 자동차 데이터를 API로 전송하는 함수
+    async function sendK8s(carId, position, speed) {
+        const startTime = performance.now();
+
+        try {
+            // await sleep(100);
+            await fetch('http://localhost:8080/hello', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const endTime = performance.now();
             const responseTime = endTime - startTime;
             responseTimesK8s.push(responseTime);
         } catch (error) {
@@ -152,26 +178,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // 평균 응답 시간을 계산하는 함수
     function calculateAverage(times) {
         const total = times.reduce((acc, time) => acc + time, 0);
-        return total / times.length;
+        return (total / times.length) || 0;
     }
 
 
     function createCar(id, color) {
         const car = new THREE.Group();
+
+        // 자동차 본체
         const bodyGeometry = new THREE.BoxGeometry(0.6, 0.3, 1.2);
-        const bodyMaterial = new THREE.MeshBasicMaterial({ color });
+        const bodyMaterial = new THREE.MeshStandardMaterial({color});
         const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
         body.position.y = 0.15;
         car.add(body);
 
+        // 자동차 창
         const windowGeometry = new THREE.BoxGeometry(0.5, 0.2, 0.6);
-        const windowMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+        const windowMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, opacity: 0.5, transparent: true });
         const carWindow = new THREE.Mesh(windowGeometry, windowMaterial);
         carWindow.position.set(0, 0.3, 0);
         car.add(carWindow);
 
+        // 바퀴
         const wheelGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.05, 16);
-        const wheelMaterial = new THREE.MeshBasicMaterial({ color: 0x333333 });
+        const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.5, roughness: 0.5 });
+
         for (let x of [-0.25, 0.25]) {
             for (let z of [-0.5, 0.5]) {
                 const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
@@ -181,16 +212,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+
         scene.add(car);
 
         // 일정 주기로 API 통신 (5초마다 위치와 속도 전송)
         const intervalId = setInterval(() => {
             const position = { x: car.position.x, y: car.position.y, z: car.position.z };
             const speed = 0.01;
-            sendK3s(id, position, speed);
+            //sendK3s_CPU(id, position, speed);
+            //sendK3s_ML(id, position, speed);
             sendK8s(id, position, speed);
             
-        }, 5000);
+        }, 10000);
 
         activeIntervals[id] = intervalId; // 자동차 ID로 interval 저장
 
@@ -280,9 +313,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateCarCount() {
         const now = new Date();
-        const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const currentMin = `${String(now.getMinutes()).padStart(2, '0')}`;
 
-        const schedule = timeSchedules.find(item => item.time === currentTime);
+        const schedule = timeSchedules.find(item => item.min === currentMin);
         const targetCount = schedule ? schedule.count : defaultCount;
 
         const interval = setInterval(() => {
@@ -290,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cars.length === targetCount) {
                 clearInterval(interval);
             }
-        }, 500);
+        }, 1000);
     }
 
     setInterval(updateCarCount, 60000);
