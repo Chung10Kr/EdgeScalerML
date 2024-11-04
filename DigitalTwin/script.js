@@ -146,7 +146,7 @@ function createCar(id, color) {
 
     // 일정 주기로 API 통신 (5초마다 위치와 속도 전송)
     const intervalId = setInterval(() => {
-        //apiCall('http://localhost:8080/hello', responseTimesK8s)
+        apiCall('http://localhost:8080/hello', responseTimesK8s)
     }, 10000);
 
     activeIntervals[id] = intervalId; // 자동차 ID로 interval 저장
@@ -204,6 +204,11 @@ function showAPIAvg() {
     const currentMin = `${String(now.getMinutes()).padStart(2, '0')}`;
     let msg = `${currentMin}|${(averageResponseTimek3s_ml / 1000).toFixed(3)}          | ${(averageResponseTimek3s_cpu / 1000).toFixed(3)}          | ${(averageResponseTimek8s / 1000).toFixed(3)}`;
     console.log(msg);
+
+    responseTimesK3s_cpu = [];
+    responseTimesK3s_ml = [];
+    responseTimesK8s = [];
+    
 }
 
 function renderBackGround() {
