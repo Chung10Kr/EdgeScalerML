@@ -17,12 +17,8 @@ const timeSchedules = [
     { min: "15", count: 100 },
     { min: "16", count: 100 },
     { min: "17", count: 100 },
-
-    { min: "15", count: 5 },
-    { min: "16", count: 10 },
-    { min: "17", count: 15 },
-    { min: "18", count: 30 },
-
+    { min: "18", count: 120 },
+    { min: "19", count: 130 },
     { min: "21", count: 10 },
     { min: "22", count: 15 },
     { min: "23", count: 30 },
@@ -32,6 +28,11 @@ const timeSchedules = [
     { min: "42", count: 35 },
     { min: "43", count: 32 },
     { min: "44", count: 31 },
+
+    { min: "57", count: 31 },
+    { min: "58", count: 51 },
+    { min: "59", count: 56 },
+
 ];
 
 
@@ -146,7 +147,9 @@ function createCar(id, color) {
 
     // 일정 주기로 API 통신 (5초마다 위치와 속도 전송)
     const intervalId = setInterval(() => {
-        apiCall('http://localhost:8080/hello', responseTimesK8s)
+        //apiCall('http://localhost:8080/hello', responseTimesK8s)
+        apiCall('http://192.168.64.18:8080/hello', responseTimesK3s_cpu)
+        
     }, 10000);
 
     activeIntervals[id] = intervalId; // 자동차 ID로 interval 저장

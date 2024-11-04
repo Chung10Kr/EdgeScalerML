@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: my-spring-container
-        image: my-spring-image:latest  # 빌드한 이미지 이름
+        image: 192.168.64.27:5000/my-spring-app:latest
         imagePullPolicy: IfNotPresent 
         ports:
         - containerPort: 8080
