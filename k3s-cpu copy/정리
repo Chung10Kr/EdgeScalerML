@@ -2,8 +2,6 @@ multipass launch --name k3s-cpu-node --cpus 2 --memory 1.5G --disk 10G
 
 # 파일 전송
 multipass transfer deployment.yaml k3s-cpu-node:/home/ubuntu/deployment.yaml
-multipass transfer demo-0.0.1-SNAPSHOT.jar k3s-cpu-node:/home/ubuntu/demo-0.0.1-SNAPSHOT.jar
-multipass transfer Dockerfile k3s-cpu-node:/home/ubuntu/Dockerfile
 multipass transfer service.yaml k3s-cpu-node:/home/ubuntu/service.yaml
 multipass transfer components.yaml k3s-cpu-node:/home/ubuntu/components.yaml
 multipass transfer hpa.yaml k3s-cpu-node:/home/ubuntu/hpa.yaml
@@ -22,19 +20,13 @@ sudo usermod -aG docker $USER
 exit
 multipass shell k3s-cpu-node
 
-# 레지스트르 컨테이너 등록
-docker run -d -p 5000:5000 --name registry registry:2
-
-# 빌드 & 레지스터 등록
-docker build -t localhost:5000/my-spring-app:latest .
-docker push localhost:5000/my-spring-app:latest
 
 # 파드 생성
 k3s kubectl delete deployment my-spring-app
 k3s kubectl apply -f deployment.yaml
-k3s kubectl get pods
 k3s kubectl apply -f components.yaml
 k3s kubectl apply -f hpa.yaml
+k3s kubectl get pods
 
 # 서비스 등록
 k3s kubectl apply -f service.yaml

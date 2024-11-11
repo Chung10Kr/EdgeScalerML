@@ -1,44 +1,37 @@
 // 시간대별 자동차 수 설정
 const timeSchedules = [
-    { min: "01", count: 10 },
-    { min: "02", count: 15 },
-    { min: "03", count: 5 },
-
-    { min: "05", count: 2 },
-    { min: "06", count: 10 },
-    { min: "07", count: 11 },
-    { min: "08", count: 3 },
-    { min: "09", count: 10 },
-    { min: "10", count: 60 },
-    { min: "11", count: 11 },
-    { min: "12", count: 15 },
-    { min: "13", count: 30 },
-    { min: "14", count: 100 },
-    { min: "15", count: 100 },
-    { min: "16", count: 100 },
-    { min: "17", count: 100 },
-    { min: "18", count: 120 },
-    { min: "19", count: 130 },
-    { min: "21", count: 10 },
-    { min: "22", count: 15 },
-    { min: "23", count: 30 },
-
-    { min: "40", count: 30 },
-    { min: "41", count: 40 },
-    { min: "42", count: 35 },
-    { min: "43", count: 32 },
-    { min: "44", count: 31 },
-
-    { min: "57", count: 31 },
-    { min: "58", count: 51 },
-    { min: "59", count: 56 },
-
+    { min: "01", count: 291 },
+    { min: "02", count: 191 },
+    { min: "03", count: 141 },
+    { min: "04", count: 151 },
+    { min: "05", count: 311 },
+    { min: "06", count: 780 },
+    { min: "07", count: 1239 },
+    { min: "08", count: 1926 },
+    { min: "09", count: 1907 },
+    { min: "10", count: 1573 },
+    { min: "11", count: 1433 },
+    { min: "12", count: 1489 },
+    { min: "13", count: 1449 },
+    { min: "14", count: 1470 },
+    { min: "15", count: 1469 },
+    { min: "16", count: 1593 },
+    { min: "17", count: 1757 },
+    { min: "18", count: 1932 },
+    { min: "19", count: 1652 },
+    { min: "20", count: 1299 },
+    { min: "21", count: 992 },
+    { min: "22", count: 862 },
+    { min: "23", count: 659 },
+    { min: "24", count: 411 }
 ];
 
 
-let responseTimesK3s_cpu = []; // 모든 자동차의 응답 시간을 저장하는 배열 - k3s CPU 기반
-let responseTimesK3s_ml = []; // 모든 자동차의 응답 시간을 저장하는 배열 - k3s  ML 기반
-let responseTimesK8s = []; // 모든 자동차의 응답 시간을 저장하는 배열 - k8s
+
+let responseTimesK3s_cpu = [];
+let responseTimesK3s_ml = [];
+let responseTimesK8s = [];
+
 let activeIntervals = {}; // 각 자동차의 setInterval ID를 저장하는 객체
 let carIdCounter = 1; // 전역에서 카운터 초기화
 
@@ -145,10 +138,9 @@ function createCar(id, color) {
     }
     scene.add(car);
 
-    // 일정 주기로 API 통신 (5초마다 위치와 속도 전송)
+    // 일정 주기로 API 통신 (1초마다 위치와 속도 전송)
     const intervalId = setInterval(() => {
-        //apiCall('http://localhost:8080/hello', responseTimesK8s)
-        apiCall('http://192.168.64.18:8080/hello', responseTimesK3s_cpu)
+        apiCall('http://192.168.64.35:8080/hello', responseTimesK3s_cpu)
         
     }, 10000);
 
@@ -195,7 +187,7 @@ function updateCarCount() {
         if (cars.length === targetCount) {
             clearInterval(interval);
         }
-    }, 1000);
+    }, 300);
 }
 
 function showAPIAvg() {
