@@ -140,7 +140,7 @@ function createCar(id, color) {
 
     // 일정 주기로 API 통신 (1초마다 위치와 속도 전송)
     const intervalId = setInterval(() => {
-        apiCall('http://192.168.64.35:8080/hello', responseTimesK3s_cpu)
+        apiCall('http://192.168.64.38:8080/hello', responseTimesK3s_cpu)
         
     }, 10000);
 
@@ -187,7 +187,7 @@ function updateCarCount() {
         if (cars.length === targetCount) {
             clearInterval(interval);
         }
-    }, 300);
+    }, 1000);
 }
 
 function showAPIAvg() {

@@ -3,7 +3,7 @@ from locust.env import Environment
 
 class MyUser(HttpUser):
     wait_time = between(1, 2)
-    host = "http://192.168.64.36:8080"  # 테스트할 서버 URL
+    host = "http://192.168.64.38:8080"  # 테스트할 서버 URL
 
     @task
     def load_test(self):
@@ -13,9 +13,9 @@ class MyUser(HttpUser):
 # 점진적 부하 증가 설정
 class StepLoadShape(LoadTestShape):
     step_time = 60           # 매 60초마다 부하 증가
-    step_users = 600          # 매 스텝마다 10명씩 사용자 추가
+    step_users = 120          # 매 스텝마다 10명씩 사용자 추가
     max_users = 20000          # 최대 사용자 수
-    spawn_rate = 100          # 초당 추가할 사용자 수
+    spawn_rate = 20          # 초당 추가할 사용자 수
 
     def tick(self):
         run_time = self.get_run_time()
