@@ -140,9 +140,9 @@ function createCar(id, color) {
 
     // 일정 주기로 API 통신 (1초마다 위치와 속도 전송)
     const intervalId = setInterval(() => {
-        apiCall('http://192.168.64.38:8080/hello', responseTimesK3s_cpu)
+        apiCall('http://192.168.64.39:8080/hello', responseTimesK3s_cpu)
         
-    }, 10000);
+    }, 1000);
 
     activeIntervals[id] = intervalId; // 자동차 ID로 interval 저장
 
@@ -163,7 +163,11 @@ async function apiCall(API, arr) {
         const responseTime = endTime - startTime;
         arr.push(responseTime);
     } catch (error) {
-        console.error(`자동차 요청 실패:`, error);
+        //console.error(`자동차 요청 실패:`, error);
+        console.log
+        const now = new Date();
+        const currentMin = `${String(now.getMinutes()).padStart(2, '0')}`;
+        let msg = `${currentMin}| 에러 발생`;
     }
 }
 

@@ -32,7 +32,9 @@ k3s kubectl get pods
 
 
 # 로그 기록
-sudo ./hpa_monitor.sh &
+chmod 777 hpa_monitor.sh 
+./hpa_monitor.sh &
+tail -f hpa_replicas_log.txt 
 
 # 파드 모니터링
 kubectl get hpa -w

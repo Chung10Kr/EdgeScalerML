@@ -1,0 +1,55 @@
+multipass launch --name k3s-ml-node --cpus 2 --memory 1.5G --disk 10G
+
+# 파일 전송
+multipass transfer deployment.yaml k3s-ml-node:/home/ubuntu/deployment.yaml
+multipass transfer service.yaml k3s-ml-node:/home/ubuntu/service.yaml
+multipass transfer components.yaml k3s-ml-node:/home/ubuntu/components.yaml
+multipass transfer hpa.yaml k3s-ml-node:/home/ubuntu/hpa.yaml
+multipass transfer hpa_monitor.sh k3s-ml-node:/home/ubuntu/hpa_monitor.sh
+multipass transfer LinearRegression.py k3s-ml-node:/home/ubuntu/LinearRegression.py
+
+# 접속
+multipass shell k3s-ml-node
+
+# 환경 셋팅
+sudo apt update
+sudo apt install -y docker.io
+
+sudo apt install -y python3 python3-pip
+python3 -m pip config set global.break-system-packages true
+pip3 install numpy pandas scikit-learn
+
+curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
+sudo usermod -aG docker $USER
+
+# 나갔다가, 재접속
+exit
+multipass shell k3s-ml-node
+
+
+# 파드 생성 & 서비스 등록
+k3s kubectl delete deployment my-spring-app
+k3s kubectl apply -f deployment.yaml
+k3s kubectl apply -f components.yaml
+k3s kubectl apply -f hpa.yaml
+k3s kubectl apply -f service.yaml
+k3s kubectl get services
+k3s kubectl get pods
+
+# 백그라운드에서 코드 실행
+nohup python3 LinearRegression.py &
+
+# 로그 기록
+chmod 777 hpa_monitor.sh 
+./hpa_monitor.sh &
+tail -f hpa_replicas_log.txt 
+
+
+
+# 파드 모니터링
+kubectl get hpa -w
+kubectl get pods -w
+
+# 로그 보기
+k3s kubectl logs <파드 이름>
+

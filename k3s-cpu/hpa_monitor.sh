@@ -4,8 +4,8 @@
 LOG_FILE="hpa_replicas_log.txt"
 echo "Timestamp,Replicas" > $LOG_FILE
 
-# 60분 동안 1분 간격으로 HPA 상태 기록
-for i in {1..60}
+# 무한 루프를 사용하여 계속해서 HPA 상태 기록
+while true
 do
   # 현재 시간과 HPA 상태의 REPLICAS 값 추출
   TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
@@ -17,5 +17,3 @@ do
   # 1분 대기
   sleep 60
 done
-
-echo "파드 수 기록 완료: $LOG_FILE"
