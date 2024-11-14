@@ -43,3 +43,5 @@ kubectl get pods -w
 # 로그 보기
 k3s kubectl logs <파드 이름>
 
+
+kubectl scale deployment <배포이름> --replicas=1
