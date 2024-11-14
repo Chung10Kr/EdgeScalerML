@@ -1,33 +1,33 @@
 // 시간대별 자동차 수 설정
 const timeSchedules = [
-    { min: "01", count: 291 },
-    { min: "02", count: 191 },
-    { min: "03", count: 141 },
-    { min: "04", count: 151 },
-    { min: "05", count: 311 },
-    { min: "06", count: 780 },
-    { min: "07", count: 1239 },
-    { min: "08", count: 1926 },
-    { min: "09", count: 1907 },
-    { min: "10", count: 1573 },
-    { min: "11", count: 1433 },
-    { min: "12", count: 1489 },
-    { min: "13", count: 1449 },
-    { min: "14", count: 1470 },
-    { min: "15", count: 1469 },
-    { min: "16", count: 1593 },
-    { min: "17", count: 1757 },
-    { min: "18", count: 1932 },
-    { min: "19", count: 1652 },
-    { min: "20", count: 1299 },
-    { min: "21", count: 992 },
-    { min: "22", count: 862 },
-    { min: "23", count: 659 },
-    { min: "24", count: 411 }
+    { min: 1, count: 291    ,  normalized_count: 9  },
+    { min: 2, count: 191    ,  normalized_count: 4  },
+    { min: 3, count: 141    ,  normalized_count: 1  },
+    { min: 4, count: 151    ,  normalized_count: 2  },
+    { min: 5, count: 311    ,  normalized_count: 10  },
+    { min: 6, count: 780    ,  normalized_count: 36  },
+    { min: 7, count: 1239   ,  normalized_count: 62  },
+    { min: 8, count: 1926   ,  normalized_count: 100  },
+    { min: 9, count: 1907   ,  normalized_count: 99   },
+    { min: 10, count: 1573   ,  normalized_count: 80  },
+    { min: 11, count: 1433   ,  normalized_count: 72  },
+    { min: 12, count: 1489   ,  normalized_count: 76  },
+    { min: 13, count: 1449   ,  normalized_count: 73  },
+    { min: 14, count: 1470   ,  normalized_count: 74  },
+    { min: 15, count: 1469   ,  normalized_count: 74  },
+    { min: 16, count: 1593   ,  normalized_count: 81  },
+    { min: 17, count: 1757   ,  normalized_count: 90  },
+    { min: 18, count: 1932   ,  normalized_count: 100  },
+    { min: 19, count: 1652   ,  normalized_count: 85  },
+    { min: 20, count: 1299   ,  normalized_count: 65  },
+    { min: 21, count: 992    ,  normalized_count: 48  },
+    { min: 22, count: 862    ,  normalized_count: 41  },
+    { min: 23, count: 659    ,  normalized_count: 30  },
+    { min: 24, count: 411    ,  normalized_count: 1   }
 ];
 
-
-
+let nowMin = 5;
+let intervalMin = 3;
 let responseTimesK3s_cpu = [];
 let responseTimesK3s_ml = [];
 let responseTimesK8s = [];
@@ -65,12 +65,13 @@ function init() {
 
     let msg = `현재 분 | 머신러닝 기반 k3s | CPU/MEM 기반 k3s | CPU/MEM 기반 k8s  (초)`;
     console.log(msg);
+
     setInterval(() => {
         showAPIAvg()
-    }, 60000);
+    }, 60000 * intervalMin);
 
-    setInterval(updateCarCount, 60000);
-    updateCarCount();
+    setInterval(updateCarCount, 60000 * intervalMin);
+    //updateCarCount();
 
     function animate() {
         requestAnimationFrame(animate);
@@ -140,8 +141,8 @@ function createCar(id, color) {
 
     // 일정 주기로 API 통신 (1초마다 위치와 속도 전송)
     const intervalId = setInterval(() => {
-        apiCall('http://192.168.64.39:8080/hello', responseTimesK3s_cpu)
-        
+        let api = "192.168.64.38"
+        apiCall(`http://${api}:8080/hello`, responseTimesK3s_cpu)
     }, 1000);
 
     activeIntervals[id] = intervalId; // 자동차 ID로 interval 저장
@@ -180,18 +181,16 @@ function adjustCars(targetCount) {
 }
 
 function updateCarCount() {
-    const now = new Date();
-    const currentMin = `${String(now.getMinutes()).padStart(2, '0')}`;
 
-    const schedule = timeSchedules.find(item => item.min === currentMin);
-    const targetCount = schedule ? schedule.count : defaultCount;
-
+    const schedule = timeSchedules.find(item => item.min === nowMin);
+    const targetCount = schedule ? schedule.normalized_count : defaultCount;
+    nowMin++ ;
     const interval = setInterval(() => {
         adjustCars(targetCount);
         if (cars.length === targetCount) {
             clearInterval(interval);
         }
-    }, 1000);
+    }, 500);
 }
 
 function showAPIAvg() {
@@ -199,9 +198,7 @@ function showAPIAvg() {
     const averageResponseTimek3s_ml = calculateAverage(responseTimesK3s_ml);
     const averageResponseTimek8s = calculateAverage(responseTimesK8s);
 
-    const now = new Date();
-    const currentMin = `${String(now.getMinutes()).padStart(2, '0')}`;
-    let msg = `${currentMin}|${(averageResponseTimek3s_ml / 1000).toFixed(3)}          | ${(averageResponseTimek3s_cpu / 1000).toFixed(3)}          | ${(averageResponseTimek8s / 1000).toFixed(3)}`;
+    let msg = `${nowMin}|${(averageResponseTimek3s_ml / 1000).toFixed(3)}          | ${(averageResponseTimek3s_cpu / 1000).toFixed(3)}          | ${(averageResponseTimek8s / 1000).toFixed(3)}`;
     console.log(msg);
 
     responseTimesK3s_cpu = [];
