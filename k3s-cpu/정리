@@ -1,11 +1,10 @@
-multipass launch --name k3s-cpu-node --cpus 2 --memory 1.5G --disk 10G
+multipass launch --name k3s-cpu-node --cpus 3 --memory 3G --disk 10G
 
 # 파일 전송
 multipass transfer deployment.yaml k3s-cpu-node:/home/ubuntu/deployment.yaml
 multipass transfer service.yaml k3s-cpu-node:/home/ubuntu/service.yaml
 multipass transfer components.yaml k3s-cpu-node:/home/ubuntu/components.yaml
 multipass transfer hpa.yaml k3s-cpu-node:/home/ubuntu/hpa.yaml
-multipass transfer hpa_monitor.sh k3s-cpu-node:/home/ubuntu/hpa_monitor.sh
 
 # 접속
 multipass shell k3s-cpu-node
@@ -31,17 +30,14 @@ k3s kubectl get services
 k3s kubectl get pods
 
 
-# 로그 기록
-chmod 777 hpa_monitor.sh 
-./hpa_monitor.sh &
-tail -f hpa_replicas_log.txt 
-
 # 파드 모니터링
 kubectl get hpa -w
 kubectl get pods -w
 
 # 로그 보기
 k3s kubectl logs <파드 이름>
-
+k3s kubectl describe pod my-spring-app-84c6599bd7-cxjqn
 
 kubectl scale deployment <배포이름> --replicas=1
+
+k3 kubectl scale deployment my-spring-app --replicas=1

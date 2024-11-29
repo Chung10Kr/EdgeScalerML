@@ -1,11 +1,12 @@
-multipass launch --name k3s-basic-node --cpus 2 --memory 1.5G --disk 10G
+# 단일 노드 k3s 설치, 오토 스케일링 X
+
+multipass launch --name k3s-basic-node --cpus 3 --memory 3G --disk 10G
 
 # 파일 전송
+multipass transfer components.yaml k3s-basic-node:/home/ubuntu/components.yaml
 multipass transfer deployment.yaml k3s-basic-node:/home/ubuntu/deployment.yaml
 multipass transfer service.yaml k3s-basic-node:/home/ubuntu/service.yaml
-multipass transfer components.yaml k3s-basic-node:/home/ubuntu/components.yaml
 multipass transfer hpa.yaml k3s-basic-node:/home/ubuntu/hpa.yaml
-multipass transfer hpa_monitor.sh k3s-basic-node:/home/ubuntu/hpa_monitor.sh
 
 # 접속
 multipass shell k3s-basic-node
@@ -22,16 +23,15 @@ multipass shell k3s-basic-node
 
 
 # 파드 생성 & 서비스 등록
-k3s kubectl delete deployment my-spring-app
+# k3s kubectl delete deployment my-spring-app
 k3s kubectl apply -f deployment.yaml
 k3s kubectl apply -f components.yaml
 k3s kubectl apply -f hpa.yaml
 k3s kubectl apply -f service.yaml
+
 k3s kubectl get services
 k3s kubectl get pods
 
-# 로그 기록
-./hpa_monitor.sh &
 
 # 파드 모니터링
 kubectl get hpa -w

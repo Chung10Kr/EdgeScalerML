@@ -32,12 +32,12 @@ public class MyController {
 
     // 디스크 I/O 부하를 발생시키는 메서드
     private void generateDiskIO() throws IOException {
-        for (int i = 0; i < 9; i++) { // 여러 개의 파일을 생성
+        for (int i = 0; i < 100; i++) { // 여러 개의 파일을 생성
             String filePath = "temp_file_" + i + ".txt";
             
             // 파일에 많은 양의 데이터를 씁니다.
             try (FileWriter writer = new FileWriter(filePath)) {
-                for (int j = 0; j < 10; j++) {  // 쓰기 양 증가
+                for (int j = 0; j < 50000; j++) {  // 쓰기 양 증가
                     writer.write("This is a line of text to generate disk I/O.\n");
                 }
             }
