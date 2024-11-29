@@ -1,4 +1,4 @@
-multipass launch --name k3s-ml-node --cpus 2 --memory 1.5G --disk 10G
+multipass launch --name k3s-cpu-node --cpus 3 --memory 3G --disk 10G
 
 # 파일 전송
 multipass transfer deployment.yaml k3s-ml-node:/home/ubuntu/deployment.yaml
@@ -53,3 +53,5 @@ kubectl get pods -w
 # 로그 보기
 k3s kubectl logs <파드 이름>
 
+
+kubectl scale deployment my-spring-app --replicas=1

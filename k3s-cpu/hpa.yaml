@@ -8,11 +8,29 @@ spec:
     kind: Deployment
     name: my-spring-app
   minReplicas: 1
-  maxReplicas: 6
+  maxReplicas: 8
   metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 50
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 20  # 대기 시간을 20초로 설정
+      policies:
+      - type: Percent
+        value: 50                     # 한 번에 전체 파드의 50%까지 줄이기
+        periodSeconds: 15             # 15초마다 실행
+      - type: Pods
+        value: 3                      # 한 번에 최대 3개 파드 줄이기
+        periodSeconds: 15             # 15초마다 실행
+    scaleUp:
+      policies:
+      - type: Percent
+        value: 100                    # 한 번에 전체 파드의 최대 100% 추가
+        periodSeconds: 10             # 10초마다 실행
+      - type: Pods
+        value: 3                      # 한 번에 최대 3개 추가
+        periodSeconds: 10             # 10초마다 실행

@@ -3,7 +3,7 @@ from locust.env import Environment
 
 class MyUser(HttpUser):
     wait_time = between(1, 2)
-    host = "http://192.168.64.38:8080"  # 테스트할 서버 URL
+    host = "http://192.168.64.43:8080"  # 테스트할 서버 URL
 
     @task
     def load_test(self):
