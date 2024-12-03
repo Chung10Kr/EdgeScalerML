@@ -61,6 +61,14 @@ for date, values in data.items():
         "pod_counts": resampled["pod_counts"].tolist()
     }
 
+# 결과 확인
+for date, values in resampled_data.items():
+    print(f"{date}:")
+    print(f"Vehicle Counts: {values['vehicle_counts']}")
+    print(f"Pod Counts: {values['pod_counts']}")
+
+
+
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 import pandas as pd
 
@@ -111,16 +119,49 @@ vehicle_series = pd.Series(vehicle_counts)
 sarima_model = train_sarima_model(vehicle_series)
 
 
+
+
+
+
+
+
+# 특정 시간에 대한 SARIMA 예측 결과를 시각화하는 함수
+def plot_sarima_predictions(vehicle_series, model_fit, steps=24):
+    """
+    SARIMA 예측 결과를 그래프로 시각화하는 함수.
+
+    Parameters:
+    - vehicle_series (pd.Series): 실제 차량 수 데이터
+    - model_fit: 학습된 SARIMA 모델
+    - steps (int): 예측할 시간 범위 (기본값 = 24시간)
+    """
+    # SARIMA 모델을 사용해 예측
+    forecast = model_fit.forecast(steps=steps).tolist()
+
+    # 그래프 그리기
+    plt.figure(figsize=(12, 6))
+    plt.plot(vehicle_series, label="실제 차량 수", color="blue")  # 실제 데이터
+    plt.plot(range(len(vehicle_series), len(vehicle_series) + steps), forecast, label="SARIMA 예측 차량 수", color="red")  # 예측 데이터
+    plt.xlabel("시간 (시간 인덱스)")
+    plt.ylabel("차량 수")
+    plt.title("SARIMA를 이용한 차량 수 예측")
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+# 학습된 SARIMA 모델과 실제 데이터를 사용해 시각화
+plot_sarima_predictions(vehicle_series, sarima_model, steps=24)
+
+
+
+
 # 1시, 2시, 3시의 예측값 가져오기
 predicted_values = get_sarima_prediction(sarima_model, hours=[1, 2, 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23])
-
-cars=[];
 
 # 예측 결과 출력
 print("SARIMA 예측 값:")
 for hour, value in predicted_values.items():
     print(f"{hour}시: {value:.2f}")
-    cars.append(value)
 
 
 
@@ -143,75 +184,30 @@ pod_data = np.array(pod_data)  # 종속 변수 (파드 수)
 regression_model = LinearRegression()
 regression_model.fit(vehicle_data, pod_data)
 
+# 4. 학습 결과 출력
+print("회귀 분석 학습 완료")
+print(f"회귀 계수 (기울기): {regression_model.coef_[0]}")
+print(f"회귀 절편 (y절편): {regression_model.intercept_}")
+
+# 산점도 그리기
+plt.figure(figsize=(10, 6))
+
+# 실제 데이터 산점도
+plt.scatter(vehicle_data, pod_data, color='blue', label='실제 데이터')
+
+# 그래프 설정
+plt.title("차량 대수와 파드 수 간의 산점도", fontsize=14)
+plt.xlabel("차량 대수", fontsize=12)
+plt.ylabel("파드 수", fontsize=12)
+plt.legend()
+plt.grid()
+plt.show()
 
 # 5. 테스트: 차량 대수에 따른 파드 수 예측
-test_vehicle_counts = np.array(cars).reshape(-1, 1)  # 예측할 차량 대수
+test_vehicle_counts = np.array([10, 20, 50, 100]).reshape(-1, 1)  # 예측할 차량 대수
 predicted_pods = regression_model.predict(test_vehicle_counts)
 
-result_pods = [];
 # 6. 예측 결과 출력
 print("\n테스트 차량 대수에 따른 예측된 파드 수:")
 for count, pods in zip(test_vehicle_counts.flatten(), predicted_pods):
-    print(f"차량 대수: {count}대 -> 예측된 파드 수: {round(pods)}개")
-    result_pods.append(round(pods))  # 결과: 4
-
-
-print(result_pods);
-import time
-import os
-# 이전 파드 수 초기화
-previous_pod_count = 0
-
-import subprocess
-
-def get_hpa_usage_and_replicas(vm_name):
-    try:
-        # multipass와 kubectl 명령어 실행
-        command = f"kubectl get hpa --no-headers"
-        output = subprocess.check_output(command, shell=True, text=True).strip()
-
-        # 첫 번째 HPA 데이터만 사용
-        if not output:
-            raise ValueError("No HPA data found.")
-        print(output);
-        hpa_data = output.split("\n")[0]  # 첫 번째 줄 데이터
-        parts = hpa_data.split()  # 공백 기준으로 분리
-
-        # 필요한 값 추출
-        targets = parts[3]  # "cpu: 12%/50%" 형태
-        replicas = int(parts[6])  # 현재 파드 수
-
-        # CPU 사용률 추출
-        current_cpu = targets.split("/")[0].replace("cpu:", "").strip()
-
-        # 결과 반환
-        return {"currentCPU": current_cpu, "replicas": replicas}
-
-    except subprocess.CalledProcessError as e:
-        print(f"Error fetching HPA metrics: {e}")
-        return None
-    except (IndexError, ValueError) as parse_error:
-        print(f"Error parsing HPA data: {parse_error}")
-        return None
-
-
-# 결과 파드 수 배열 순회
-
-# result_pods 배열 순회
-for pod_count in result_pods:
-    pod_count = round(pod_count)  # 정수로 반올림
-
-    # 현재 파드 수 가져오기
-    result = get_hpa_usage_and_replicas("my-spring-app")
-    current_pod_count = result['replicas']
-    
-    print(f"{pod_count} - {current_pod_count}" )
-    
-    # 파드 수가 이전 단계보다 클 때만 스케일링 실행
-    if pod_count > current_pod_count:
-        # kubectl 명령어 생성
-        os.system(f"kubectl scale deployment my-spring-app --replicas={pod_count}")
-        print(f"{pod_count} DONE")
-        # 이전 파드 수 갱신
-    time.sleep(60 * 1) # 1분 대기
-    
+    print(f"차량 대수: {count}대 -> 예측된 파드 수: {pods:.2f}개")

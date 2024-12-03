@@ -1,21 +1,21 @@
 const { exec } = require('child_process');
 
-const VM_NAME = "k3s-cpu-node";
-let api = "192.168.64.47";
+const VM_NAME = "k3s-ml-node";
+let api = "192.168.64.56";
 
 // 시간대별 자동차 수 설정
 const timeSchedules = {
-    "12m4d":[7,2,0,1,9,33,58,95,93,72,67,66,67,72,72,74,85,100,88,58,44,34,22,13],
-    "12m5d":[7,3,0,2,10,35,60,94,96,74,68,70,69,72,73,78,84,100,91,60,48,34,23,13],
-    "12m6d":[7,2,0,1,9,33,58,95,93,72,67,66,67,72,72,74,85,100,88,58,44,34,22,13],
-    "12m7d":[9,3,0,1,10,36,62,100,99,80,73,76,74,75,75,82,91,100,85,65,48,41,29,16],
-    "12m8d":[9,5,0,2,10,34,59,91,91,74,69,70,73,72,75,81,91,100,88,60,51,40,29,19],
-    "12m9d":[9,4,1,2,10,36,62,100,99,80,72,76,73,74,74,81,90,100,85,65,48,41,30,1],
+    //"12m4d":[7,2,0,1,9,33,58,95,93,72,67,66,67,72,72,74,85,100,88,58,44,34,22,13],
+    //"12m5d":[7,3,0,2,10,35,60,94,96,74,68,70,69,72,73,78,84,100,91,60,48,34,23,13],
+    //"12m6d":[7,2,0,1,9,33,58,95,93,72,67,66,67,72,72,74,85,100,88,58,44,34,22,13],
+    //"12m7d":[9,3,0,1,10,36,62,100,99,80,73,76,74,75,75,82,91,100,85,65,48,41,29,16],
+    //"12m8d":[9,5,0,2,10,34,59,91,91,74,69,70,73,72,75,81,91,100,88,60,51,40,29,19],
+
+    "12m11d":[8, 4, 1, 3, 13, 39, 64, 94, 100, 76, 70, 69, 69, 71, 74, 76, 83, 98, 88, 56, 44, 33, 24, 12]
 }
 
 
 let responseTime = [];
-let logs = [];
 
 const fs = require('fs');
 
@@ -72,22 +72,12 @@ class Simulation {
         console.log(
             `Simulation started at: ${now.getHours()}h ${now.getMinutes()}m ${now.getSeconds()}s`
         );
-        let SCRIPT_PATH = "/home/ubuntu/LinearRegression.py";
-        if( VM_NAME == "k3s-cpu-ml_linear" ){
-            SCRIPT_PATH = "/home/ubuntu/LinearRegression.py";
-        }else if( VM_NAME == "k3s-cpu-ml_lstm" ){
-            SCRIPT_PATH = "/home/ubuntu/LSTM.py";
-        }else if( VM_NAME == "k3s-cpu-ml_arima" ){
-            SCRIPT_PATH = "/home/ubuntu/ARIMA.py";
-        }
-
+/*
         if( [
             "k3s-ml-node",
-            "k3s-cpu-ml_linear",
-            "k3s-cpu-ml_lstm",
-            "k3s-cpu-ml_arima",
         ].indexOf(VM_NAME) != -1 ){
-            const command = `multipass exec ${VM_NAME} -- python3 ${SCRIPT_PATH}`;
+
+            const command = `multipass exec ${VM_NAME} -- nohup python3 "/home/ubuntu/ARIMA.py" > /home/ubuntu/arima.log 2>&1 &`;
             exec(command, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Error running py: ${stderr}`);
@@ -95,13 +85,13 @@ class Simulation {
                 }
             });
 
-            await this.wait(1500);
+            await this.wait(this.minGap);
         }
-        
+ */
         // 순회 코드
         for (const [key, values] of Object.entries(timeSchedules)) {
             for (const value of values) {
-                await this.adjustCars(value); // 차량 수 조정
+                this.adjustCars(value); // 차량 수 조정
                 await this.wait(this.minGap); // 1분 대기
                 currentMinute++;
             }
@@ -196,12 +186,10 @@ async function showAPIAvg(){
     const avg = calculateAverage(responseTime);
     const { currentCPU, replicas } = await getHPAUsageAndReplicas();
     let msg = `${cars.length}|${(avg / 1000).toFixed(3)}|${currentCPU}|${replicas}`;
-    console.log( msg );
+    console.log( msg )
     responseTime = [];
-    return msg;
 }
 
 setInterval( () => {
-    let log = showAPIAvg();
-    logs.push(log)
+    showAPIAvg();
 },1000 * 30)
