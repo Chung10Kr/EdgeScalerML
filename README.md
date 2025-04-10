@@ -11,3 +11,4 @@ This project implements **machine learning-based auto-scaling** for connected ca
 - **K8s & K3s Compatibility**: Supports both full-scale Kubernetes and lightweight K3s for versatile deployment.
 
 ## Project Structure
+
