@@ -10,6 +10,7 @@ class MyUser(HttpUser):
         self.client.get("/hello")  # 테스트할 엔드포인트
 
 
+
 # 점진적 부하 증가 설정
 class StepLoadShape(LoadTestShape):
     step_time = 60           # 매 60초마다 부하 증가
