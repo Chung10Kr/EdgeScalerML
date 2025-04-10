@@ -9,3 +9,4 @@
 - GPU 클러스터에서의 메시지 큐와 실시간 처리량 기반 ML 마이크로서비스 오토스케일링 - 고려대학교,2023,
 - Online machine learning for auto-scaling in the edge computing✩ - 브라질, 2022
 - Machine learning-based auto-scaling for containerized applications – 2019, 쿠웨이트
+
